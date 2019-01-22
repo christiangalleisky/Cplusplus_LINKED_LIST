@@ -1,0 +1,256 @@
+#include <iostream>
+using namespace std;
+
+class Node;
+typedef Node* NodePtr;
+
+class Node 
+{
+   public:
+      int number;
+      NodePtr next;
+};
+
+// Globals to help verify there are no memory leaks.
+int newCount=0;
+int deleteCount=0;
+
+
+void build (NodePtr&, int);
+void print (NodePtr);
+bool search (NodePtr, int);
+void insert (NodePtr& top, int item);
+void remove (NodePtr&, int);
+void destroy (NodePtr&);
+void copy (NodePtr, NodePtr&);
+//--------------------------------------------
+
+
+void build (NodePtr& top, int size) 
+{
+// "build" will create an ordered linked list consisting
+// of the first "size" even integers.
+   NodePtr newNode;
+   int i;
+   destroy (top);
+   for (i=size;i>0;i--) 
+   {
+      newNode = new Node; 
+	  newCount++; // keeping track of the number of Nodes added
+      newNode -> next = top;
+      newNode -> number = i*2;
+      top = newNode;
+   }
+}
+//--------------------------------------------
+
+void print(NodePtr top) 
+{
+// "print" will output the entire linked list pointed to
+// by "top" to the standard output device --
+// one "number" per line.
+   NodePtr curr;
+   curr = top;
+   while (curr != NULL) 
+   {
+      cout << curr -> number << "->";
+      curr = curr -> next;
+   }
+   cout << endl;
+}
+
+//--------------------------------------------
+
+
+bool search (NodePtr top, int key) 
+{
+// "search" will perform a linear search of the linked list
+// pointed to by "top" for the integer "key". The function will
+// return true if "key" is found and false otherwise.
+   NodePtr curr;
+   bool found;
+   curr = top;
+   found = false;
+   while ((curr != NULL) && (!found))
+      if (curr -> number == key)
+         found = true;
+      else
+         curr = curr -> next;
+   return (found);
+}
+
+//--------------------------------------------
+
+void insert (NodePtr& top, int item) 
+{
+// "insert" will perform an ordered insert of "item"
+// into the linked list pointed to by "top".
+   NodePtr curr=top, prev=NULL, newNode;
+   bool found=false;
+   newNode = new Node; 
+   newCount++; // keeping track of the number of Nodes added
+   newNode -> number = item;
+   while ((curr != NULL) && (!found))
+   {
+      if (item > curr -> number) 
+	  {
+         prev = curr;
+         curr = curr -> next;
+      }
+      else
+         found = true; 
+   }
+   newNode -> next = curr;
+   if (prev == NULL)
+      top = newNode;
+   else
+      prev -> next = newNode;
+}
+
+//--------------------------------------------
+
+void remove (NodePtr& top, int key) {
+// "remove" will remove the first occurrence of a Node
+// from the linked list pointed to by "top" that
+// contains the data component identified by "key".
+// It is assumed that "key" exists in the linked list.
+   NodePtr curr, temp;
+   if (key == top -> number) 
+   {
+         temp = top;
+         top = top -> next;
+   }
+   else 
+   {
+      curr = top;
+      while (curr -> next -> number != key)
+         curr = curr -> next;
+      temp = curr -> next;
+      curr -> next = curr -> next -> next;
+   }
+   delete temp; 
+   deleteCount++;// keeping track of the number of Nodes deleted
+}
+
+//--------------------------------------------
+void copy (NodePtr atop, NodePtr& btop) 
+{
+// "copy" will make a copy of linked list pointed to
+// by "atop" into a new linked list pointed to by btop.
+// If "btop" is not empty, it will be destroyed first.
+   NodePtr acurr, bcurr;
+   destroy (btop);
+   if (atop != NULL) 
+   {
+      btop = new Node; 
+	  newCount++; // keeping track of the number of Nodes added
+      btop -> number = atop -> number;
+      acurr = atop;
+      bcurr = btop;
+	  while (acurr -> next != NULL) 
+	  {
+          bcurr -> next = new Node; 
+		  newCount++; // keeping track of the number of Nodes added
+          acurr = acurr -> next;
+          bcurr = bcurr -> next;
+          bcurr -> number = acurr -> number;
+      }
+      bcurr -> next = NULL;
+   }
+}       
+//--------------------------------------------
+void destroy(NodePtr& top) 
+{
+// "destroy" will deallocate all Nodes in linked list pointed
+// to by "top", and will set "top" to NULL.
+   NodePtr curr, temp;
+   curr = top;
+   while (curr != NULL) 
+   {
+      temp = curr;
+      curr = curr -> next;
+      delete temp; 
+	  deleteCount++; // keeping track of the number of Nodes created
+   }
+   top = NULL;
+}
+
+//--------------------------------------------
+int main () 
+{
+   NodePtr list1=NULL, list2=NULL;
+   build (list1, 10);
+
+   cout << "--------------------------------------------" << endl;
+   cout << "contents of list1:" << endl;
+   print (list1);
+   cout << "return.....";
+   getchar();
+
+   build (list2, 100);
+   cout << "--------------------------------------------" << endl;
+   cout << "contents of list2:" << endl;
+   print (list2);
+   cout << "return.....";
+   getchar();
+
+   copy (list1, list2);
+   cout << "--------------------------------------------" << endl;
+   cout << "new contents of list2 after copying:" << endl;
+   print (list2);
+   cout << "return.....";
+   getchar();
+
+   insert (list1, -77);
+   cout << "--------------------------------------------" << endl;
+   cout << "after inserting -77 into list1:" << endl;
+   print (list1);
+   cout << "return.....";
+   getchar();
+
+   insert (list1, 999);
+   cout << "--------------------------------------------" << endl;
+   cout << "after inserting 999 into list1:" << endl;
+   print (list1);
+   cout << "return.....";
+   getchar();
+
+   remove (list1,4);
+   cout << "--------------------------------------------" << endl;
+   cout << "after removing 4 from list1:" << endl;
+   print (list1);
+   cout << "return.....";
+   getchar();
+
+
+   remove (list1,-77);
+   cout << "--------------------------------------------" << endl;
+   cout << "after removing -77 from list1:" << endl;
+   print (list1);
+   cout << "return.....";
+   getchar();
+
+
+   cout << "--------------------------------------------" << endl;
+   cout << "search for 12: " << boolalpha << search(list1, 12) << endl;
+   cout << "search for -999: " << boolalpha<< search(list1, -999) << endl;
+
+
+   cout << "--------------------------------------------" << endl;
+   destroy (list1); 
+   cout << "--------------------------------------------" << endl;
+   cout << "after destroyoing list1:" << endl;
+   print (list1);
+   cout << "return.....";
+   getchar();
+
+   cout << "--------------------------------------------" << endl;
+   destroy (list2); 
+   cout << "--------------------------------------------" << endl;
+   cout << "after destroyoing list2:" << endl;
+   print (list2);
+   cout << "return.....";
+   getchar();
+
+}
+//--------------------------------------------
